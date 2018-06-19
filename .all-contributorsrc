@@ -1,0 +1,23 @@
+{
+  "projectName": "vscode-irc",
+  "projectOwner": "audstanley",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 50,
+  "commit": true,
+  "contributors": [
+    {
+      "login": "audstanley",
+      "name": "Richard Stanley",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/2934052?v=4",
+      "profile": "http://www.audstanley.com",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    }
+  ]
+}
