@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 const NetSocket = require("net").Socket;
 const IrcSocket = require("irc-socket");
 const express   = require('express');
@@ -8,7 +9,7 @@ interface ircConnection {
     ircUrl        : string;
     port?         : number;
     username      : string;
-    channel?      : string;
+    channels?      : string[];
     ircNicknames? : string[];
     realName?     : string;
 }
@@ -19,7 +20,7 @@ export class IRCExpressEndpoint {
     public ircUrl       : string;
     public port         : number;
     public username     : string;
-    public channel      : string;
+    public channels     : string[];
     public ircNicknames : string[];
     public realName     : string;
     public ircUrlMatch  : string[] | null;
@@ -37,7 +38,7 @@ export class IRCExpressEndpoint {
         this.ircUrl         = obj.ircUrl;
         this.port           = ((obj.port)? obj.port : 6667 );
         this.username       = obj.username;
-        this.channel        = ((obj.channel)? obj.channel : 'minecraft');
+        this.channels       = ((obj.channels)? obj.channels : ['minecraft']);
         this.ircNicknames   = ((obj.ircNicknames)? obj.ircNicknames : ['VSCodeUser-1', 'VSCodeUser-2', 'VSCodeUser-3']);
         this.realName       = ((obj.realName)? obj.realName : 'Some VSCode User');
         this.ircUrlMatch    = this.ircUrl.match(/([a-zA-Z]+)\.([a-zA-Z0-9-_]+)\.([a-zA-Z0-9-_]{2,5})/);
@@ -57,33 +58,41 @@ export class IRCExpressEndpoint {
 
     // make the connection to the server, and log server messages.
     public launchIRCConnection() {
-        this.client.connect()
-        .then((res: any) => {
-            console.log("RESPONSE:", JSON.stringify(res, null, 2))
-            if (res.isOk()) {
-                this.client.raw(`JOIN #${this.channel}`);
-                return res;
-                //client.end(); // End connection to server.
-            }
-        })
-        .then((res : any) => {
-            this.nickname = res.value.nickname
-        })
-        .catch((e : string) => console.log(e));
+        return this.client.connect()
+            .then((res: any) => {
+                console.log("RESPONSE:", JSON.stringify(res, null, 2))
+                if (res.isOk()) {
+                    for (let channel of this.channels) this.client.raw(`JOIN #${channel}`)
+                    //this.client.raw(`JOIN #${this.channel}`);
+                    return res;
+                    //client.end(); // End connection to server.
+                }
+            })
+            .then((res : any) => {
+                if (res.value.nickname) {
+                    this.nickname = res.value.nickname
+                    vscode.window.showInformationMessage(`Successful: connection to ${this.ircUrl}`);
+                }
+            })
+            .catch((e : string) => console.log(e));
+    };
 
+    public listenToMessages() {
         this.client.on('data', (message: string) => {
             console.log(message); /*?*/
-            this.parseMessage(message);
+            //this.parseMessage(message);
         });
-    };
+    }
 
     // for parsing server messages:
     public removeSelf = (e : string) => e !== `${this.nickname}`
     public remove = (array : string[], element : string) => array.filter(e => e !== element);
     public parseMessage(m : string) {
-        let listOfUsersRegex = new RegExp(`:([A-Za-z]+)\.freenode\.net 353 (${this.nickname}) @ #${this.channel} :(\.+)`);
+        let listOfUsersRegex = new RegExp(`
+            :([A-Za-z]+)\.${this.urlBase}\.${this.urlEndPoint} 353 (${this.nickname}) @ #${this.channels[0]} :(\.+)
+        `);
         let matchedUsers = m.match(listOfUsersRegex);
-        if (matchedUsers !== null) {
+        if (matchedUsers) {
             if (matchedUsers.length > 3) {
                 let matchedUsersCorrectSyntax = matchedUsers[3].replace('@', '')
                 console.log('MATCHED USERS:', matchedUsers[3].replace('@', ''));
@@ -94,10 +103,10 @@ export class IRCExpressEndpoint {
     
         let userLeftRegex = new RegExp(`(:\\S+) QUIT`);
         let userLeftChannel = m.match(userLeftRegex);
-        if (userLeftChannel !== null) {
+        if (userLeftChannel) {
             if (userLeftChannel.length > 0) {
                 let theUserThatLeft = userLeftChannel[1].match(/:([a-zA-Z0-9\^-_]+)!/)
-                if (theUserThatLeft !== null) {
+                if (theUserThatLeft) {
                     console.log("USER_THAT_LEFT_CHANNEL:", userLeftChannel);
                     this.arrayOfUsers = this.remove(this.arrayOfUsers, theUserThatLeft[1]);
                     console.log("ARRAY_OF_USERS_AFTER_QUIT:", this.arrayOfUsers);
@@ -105,12 +114,13 @@ export class IRCExpressEndpoint {
             }
         }
     
-        let userJoinedRegex = new RegExp(`(:\\S+) JOIN #${this.channel}`);
+        // for now, only the first channel is able to be accessed.
+        let userJoinedRegex = new RegExp(`(:\\S+) JOIN #${this.channels[0]}`);
         let userJoinedChannel = m.match(userJoinedRegex)
-        if (userJoinedChannel !== null) {
+        if (userJoinedChannel) {
             if (userJoinedChannel.length > 0) {
                 let theUserThatJoined = userJoinedChannel[1].match(/:([a-zA-Z0-9\^-_]+)!/)
-                if (theUserThatJoined !== null) {
+                if (theUserThatJoined) {
                     console.log("USER_JOINED:", userJoinedChannel[1])
                     this.arrayOfUsers = this.arrayOfUsers.concat([theUserThatJoined[1]])
                     console.log("ARRAY_OF_USERS_AFTER_JOIN:", this.arrayOfUsers)
