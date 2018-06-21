@@ -9,7 +9,7 @@ interface ircConnection {
     ircUrl        : string;
     port?         : number;
     username      : string;
-    channels?      : string[];
+    channels?     : string[];
     ircNicknames? : string[];
     realName?     : string;
 }
@@ -34,11 +34,11 @@ export class IRCExpressEndpoint {
     public htmlPage     : string             = "Loading";
 
     // set the variables with the constructor (see: interface ircConnection)
-    constructor(obj: ircConnection) {
+    constructor(obj : ircConnection, gitChannel : string) {
         this.ircUrl         = obj.ircUrl;
         this.port           = ((obj.port)? obj.port : 6667 );
         this.username       = obj.username;
-        this.channels       = ((obj.channels)? obj.channels : ['minecraft']);
+        this.channels       = ((obj.channels)? ((gitChannel)? obj.channels.concat(gitChannel) : ['minecraft']) : [ 'minecraft' ]);
         this.ircNicknames   = ((obj.ircNicknames)? obj.ircNicknames : ['VSCodeUser-1', 'VSCodeUser-2', 'VSCodeUser-3']);
         this.realName       = ((obj.realName)? obj.realName : 'Some VSCode User');
         this.ircUrlMatch    = this.ircUrl.match(/([a-zA-Z]+)\.([a-zA-Z0-9-_]+)\.([a-zA-Z0-9-_]{2,5})/);
@@ -62,7 +62,9 @@ export class IRCExpressEndpoint {
             .then((res: any) => {
                 console.log("RESPONSE:", JSON.stringify(res, null, 2))
                 if (res.isOk()) {
-                    for (let channel of this.channels) this.client.raw(`JOIN #${channel}`)
+                    console.log('CHANNELS TO CONNECT TO: ', this.channels)
+                    for (let channel of this.channels)
+                        if(channel) this.client.raw(`JOIN #${channel}`)
                     //this.client.raw(`JOIN #${this.channel}`);
                     return res;
                     //client.end(); // End connection to server.

@@ -1,59 +1,48 @@
 import * as vscode from 'vscode';
 import { IRCExpressEndpoint } from './express/ircAPI';
-import { resolve } from 'url';
+
+interface ircConnection {
+    ircUrl        : string;
+    port?         : number;
+    username      : string;
+    channels?     : string[];
+    ircNicknames? : string[];
+    realName?     : string;
+}
 
 export class IRCController {
+    public ircWorkspaceConfig : any;
+    public ircWorkspaceServers : Array<ircConnection>;
     public gitChannel : string;
 
     constructor(context: vscode.ExtensionContext, gitChannel: string) {
-        this.gitChannel = gitChannel;
-        context.subscriptions.push(vscode.commands.registerCommand('irc.start', () => {
-            IRCPanel.createOrShow(context.extensionPath);
-            //vscode.window.showInformationMessage('IRC Client loaded');
-        }));
-    
-        context.subscriptions.push(vscode.commands.registerCommand('irc.doRefactor', () => {
-            if (IRCPanel.currentPanel) {
-                IRCPanel.currentPanel.doRefactor();
-            }
-        }));
+        this.ircWorkspaceConfig = vscode.workspace.getConfiguration('irc')
+        this.ircWorkspaceServers = this.ircWorkspaceConfig['servers']
+        this.gitChannel = ((this.ircWorkspaceConfig['logIntoGitChannel'])? gitChannel : "");
+        console.log('IRCCONTROLLER GITCHANNEL ARRAY:', this.gitChannel)
+        if(this.ircWorkspaceConfig) {
+            console.log("IRC SERVERS:", JSON.stringify(this.ircWorkspaceConfig['servers'],null,2))
+        }
+
     }
 
     public connectToServers() {
-            // This is where we create an IRC Server Connection:
-            let IRCExpressEndpointFreenode = new IRCExpressEndpoint({
-                ircUrl       : 'irc.freenode.net',
-                port         : 6667,
-                username     : 'audstanley',
-                channels     : [ ((this.gitChannel)? this.gitChannel : 'audstanley') ],
-                ircNicknames : [ 'audstanley-11', 'audstanley-12' ],
-                realName     : 'Richard Stanley'
-            });
+            // Populate a promisified server array 
+            let serverPromiseStack = [];
+            for (let IRCExpressEndPointConnection of this.ircWorkspaceServers) {
+                let IRCExpressEndpointPromise : any = new IRCExpressEndpoint(IRCExpressEndPointConnection, this.gitChannel)
+                serverPromiseStack.push(IRCExpressEndpointPromise.launchIRCConnection())
+                serverPromiseStack.push(IRCExpressEndpointPromise.listenToMessages())
+            }
 
-            let IRCExpressEndpointAudStanley = new IRCExpressEndpoint({
-                ircUrl       : 'www.audstanley.com',
-                port         : 6667,
-                username     : 'audstanley',
-                channels     : [ ((this.gitChannel)? this.gitChannel : 'audstanley') ],
-                ircNicknames : [ 'audstanley-11', 'audstanley-12' ],
-                realName     : 'Richard Stanley'
-            });
-
-            // This is where we lauch those connections:
-
-            return Promise.all([
-                IRCExpressEndpointFreenode.launchIRCConnection(), 
-                IRCExpressEndpointFreenode.listenToMessages(),
-                IRCExpressEndpointAudStanley.launchIRCConnection(),
-                IRCExpressEndpointFreenode.listenToMessages()
-            ]).then((a: any)=> {
-                console.log("PROMISE ALL COMPLETE")
-            }).catch((e)=> console.log(e))
+            // Launch those server connections:
+            return Promise.all(serverPromiseStack)
+                .then((a: any)=> {
+                    console.log("PROMISE ALL COMPLETE")
+                })
+                .catch((e)=> console.log(e))
 
     }
-  
-    
-    
 
 };
 
