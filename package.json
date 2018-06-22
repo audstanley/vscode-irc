@@ -45,43 +45,48 @@
           "description": "This will auto login to an IRC channel: #yourGitHubUserName-yourProjectName."
         },
         "irc.servers": {
-          "type": ["object", "array"],
+          "type": [
+            "object",
+            "array"
+          ],
           "default": [
             {
-              "ircUrl"       : "irc.freenode.net",
-              "port"         : 6667,
-              "username"     : "VSCodePerson",
-              "channels"     : [ ],
-              "ircNicknames" : [  "VSCode-0",
-                                  "VSCode-1", 
-                                  "VSCode-2", 
-                                  "VSCode-3", 
-                                  "VSCode-4", 
-                                  "VSCode-5", 
-                                  "VSCode-6",
-                                  "VSCode-7",
-                                  "VSCode-8",
-                                  "VSCode-9"
-                                ],
-              "realName"     : "VSCodeUser"
+              "ircUrl": "irc.freenode.net",
+              "port": 6667,
+              "username": "VSCodeGuy",
+              "channels": [],
+              "ircNicknames": [
+                "VSCode-0",
+                "VSCode-1",
+                "VSCode-2",
+                "VSCode-3",
+                "VSCode-4",
+                "VSCode-5",
+                "VSCode-6",
+                "VSCode-7",
+                "VSCode-8",
+                "VSCode-9"
+              ],
+              "realName": "VSCodeUser"
             },
             {
-              "ircUrl"       : "www.audstanley.com",
-              "port"         : 6667,
-              "username"     : "VSCodePerson",
-              "channels"     : [ ],
-              "ircNicknames" : [  "VSCode-0",
-                                  "VSCode-1", 
-                                  "VSCode-2", 
-                                  "VSCode-3", 
-                                  "VSCode-4", 
-                                  "VSCode-5", 
-                                  "VSCode-6",
-                                  "VSCode-7",
-                                  "VSCode-8",
-                                  "VSCode-9"
-                                ],
-              "realName"     : "VSCodeUser"
+              "ircUrl": "www.audstanley.com",
+              "port": 6667,
+              "username": "VSCodePerson",
+              "channels": [],
+              "ircNicknames": [
+                "VSCode-0",
+                "VSCode-1",
+                "VSCode-2",
+                "VSCode-3",
+                "VSCode-4",
+                "VSCode-5",
+                "VSCode-6",
+                "VSCode-7",
+                "VSCode-8",
+                "VSCode-9"
+              ],
+              "realName": "VSCodeUser"
             }
           ],
           "description": "The List of servers you will connect to."
@@ -95,6 +100,7 @@
     "irc-socket": "^3.0.8",
     "net": "^1.0.2",
     "node-fetch": "^2.1.2",
+    "portfinder": "^1.0.13",
     "vscode": "^1.1.18"
   },
   "devDependencies": {
