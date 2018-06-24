@@ -39,6 +39,18 @@ class IRCController {
         }
         return serverStatusFromIRCEXpressEndPoints;
     }
+    getServerEvents() {
+        return new Promise((resolve, reject) => {
+            let serverEventsArray = [];
+            for (let IRCExpressEndpoint of this.IRCExpressEndPointObjectArray) {
+                serverEventsArray.push(IRCExpressEndpoint.serverEvent);
+            }
+            if (serverEventsArray == null)
+                reject('The IRCAPI event emitter loading up fast enough.');
+            else
+                resolve(serverEventsArray);
+        });
+    }
 }
 exports.IRCController = IRCController;
 ;

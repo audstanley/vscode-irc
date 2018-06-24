@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { EventEmitter } from 'events';
 import { IRCExpressEndpoint } from './express/ircAPI';
 
 interface ircConnection {
@@ -9,6 +10,24 @@ interface ircConnection {
     ircNicknames? : string[];
     realName?     : string;
 }
+
+interface userMesssage {
+    user: string;
+    message: string;
+    time: number;
+}
+
+interface channelConnections {
+    channelName    : string;
+    messages       : userMesssage[];
+    usersInChannel : string[];
+}
+
+interface serverStatus {
+    serverName    : string;
+    channelCons   : channelConnections[];
+}
+
 
 export class IRCController {
     public IRCExpressEndPointObjectArray : Array<IRCExpressEndpoint>;
@@ -40,6 +59,7 @@ export class IRCController {
                 serverPromiseStack.push(IRCExpressEndpointPromise.launchIRCConnection())
                 serverPromiseStack.push(IRCExpressEndpointPromise.listenToMessages())
                 this.IRCExpressEndPointObjectArray.push(IRCExpressEndpointPromise)
+            
             }
 
             // Launch those server connections:
@@ -52,13 +72,25 @@ export class IRCController {
                 .catch((e)=> console.log(e))
     }
 
-    getServerStatusFromIRCEXpressEndPoints() {
+    public getServerStatusFromIRCEXpressEndPoints() {
         let serverStatusFromIRCEXpressEndPoints : Array<Promise<object>> | any = [];
         for (let IRCExpressEndpoint of this.IRCExpressEndPointObjectArray) {
             serverStatusFromIRCEXpressEndPoints.push( IRCExpressEndpoint.serverStatus )
         }
         return serverStatusFromIRCEXpressEndPoints;
     }
+
+    public getServerEvents() {
+        return new Promise((resolve, reject) => {
+            let serverEventsArray : Array<EventEmitter> = [];
+            for (let IRCExpressEndpoint of this.IRCExpressEndPointObjectArray) {
+                serverEventsArray.push( IRCExpressEndpoint.serverEvent )
+            }
+            if(serverEventsArray == null) reject('The IRCAPI event emitter loading up fast enough.')
+            else resolve(serverEventsArray)
+        })
+    }
+
 
 };
 

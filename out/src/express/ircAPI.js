@@ -7,6 +7,7 @@ const IrcSocket = require("irc-socket");
 const express = require('express');
 const app = express();
 const portfinder = require('portfinder');
+const messageEvent = new events_1.EventEmitter();
 // make the class usable with 'export' class IRCExpressEndpoint,
 // then we declare all the variables.  All the public variables are available to the extension.ts file
 class IRCExpressEndpoint {
@@ -48,7 +49,7 @@ class IRCExpressEndpoint {
             app.get('/', (req, res) => res.send('Hello World!'));
             app.listen(port, () => console.log(`IRC localServer: ${this.ircUrl} listening on port ${port}`));
         });
-        this.serverEvent = new events_1.EventEmitter();
+        this.serverEvent = new events_1.EventEmitter;
     }
     initialChannelConnections() {
         let channelConsFromServer = [];
@@ -107,20 +108,20 @@ class IRCExpressEndpoint {
                     let indexOfChannel = this.serverStatus.channelCons.findIndex(x => x.channelName == fromChannel);
                     if (this.serverStatus.channelCons[indexOfChannel]) {
                         this.serverStatus.channelCons[indexOfChannel].messages.push({ user: fromUser, message: MessageArray.slice(3).join(' ').substr(1), time: (new Date).getTime() });
-                        this.serverEvent.emit('newMessage', this.serverStatus.channelCons);
+                        this.serverEvent.emit('newMessage', this.serverStatus);
                     }
                     if (MessageArray[3] === `:${this.nickname}:`) {
                         console.log('GOT DIRECT MESSAGE');
                         if (this.nickname) {
                             vscode.window.showInformationMessage(`${fromUser}:` + MessageArray.slice(3).join(' ').substr(this.nickname.length + 2));
-                            this.serverEvent.emit('newMessage', this.serverStatus.channelCons);
+                            this.serverEvent.emit('newMessage', this.serverStatus);
                         }
                     }
                     if (MessageArray[2] === `${this.nickname}`) {
                         console.log('GOT DIRECT MESSAGE');
                         if (this.nickname) {
                             vscode.window.showInformationMessage(`${fromUser}:` + MessageArray.slice(3).join(' ').substr(this.nickname.length + 2));
-                            this.serverEvent.emit('newPrivateMessage', this.serverStatus.channelCons);
+                            this.serverEvent.emit('newMessage', this.serverStatus);
                         }
                     }
                     console.log("MESSAGES FROM USER:", fromUser, this.serverStatus.channelCons[indexOfChannel].messages
@@ -168,6 +169,7 @@ class IRCExpressEndpoint {
             }
             if (MessageArray.length === 2) {
                 if (MessageArray[0] === 'PING') {
+                    this.serverEvent.emit('newMessage', this.serverStatus);
                     //console.log("PING:\n\t", JSON.stringify(this.serverStatus.channelCons, null, 4));
                 }
             }
@@ -183,6 +185,7 @@ class IRCExpressEndpoint {
                         let indexOfChannel = this.serverStatus.channelCons.findIndex(x => x.channelName == fromChannel);
                         this.serverStatus.channelCons[indexOfChannel].usersInChannel = this.serverStatus.channelCons[indexOfChannel].usersInChannel.concat(fromUser).sort(this.alphebeticSort);
                         console.log("USER IS NOW AT CHANNEL INDEX:", indexOfChannel, "AT USERINCHANNEL INDEX:", this.serverStatus.channelCons[indexOfChannel].usersInChannel.indexOf(fromUser));
+                        this.serverEvent.emit('newMessage', this.serverStatus);
                     }
                     else {
                         console.log('The USER IS YOU!!!');
@@ -191,6 +194,7 @@ class IRCExpressEndpoint {
                         if (!this.serverStatus.channelCons[indexOfChannel]) {
                             console.log('CREATING NEW CHANNEL:', fromChannel, 'BECAUSE OF:', fromUser);
                             this.serverStatus.channelCons.push({ channelName: MessageArray[2].substr(1).replace(':', ''), messages: [], usersInChannel: [] });
+                            this.serverEvent.emit('newMessage', this.serverStatus);
                         }
                     }
                 }
