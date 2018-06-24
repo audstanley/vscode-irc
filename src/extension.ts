@@ -78,6 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
                             serverEvent.on('newMessage', (serverStatus : serverStatus) => {
                                 console.log('IT WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOORKED')
                                 console.log("SERVERSTATUS CHANGED:", JSON.stringify(serverStatus,null,2))
+                                html = JSON.stringify(serverStatus,null,2)
                             })
                         }
                     })
@@ -99,7 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-
+    /*
     setInterval(()=> {
         let serverStatusArray : Array<Promise<object>> | any = IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints()
         console.log(serverStatusArray)
@@ -113,6 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
         servers = serverHtml
 
     }, 1000)
+    */
 
     
 
@@ -253,17 +255,26 @@ export function activate(context: vscode.ExtensionContext) {
             .grid-container {
                 display: grid;
                 height: 100%;
+                grid-row-gap: 5px;
+                grid-column-gap: 5px;
                 grid-template-columns: 150px 1fr 150px;
                 grid-template-rows: 30px 1fr 30px;
-                grid-template-areas: ". header nickName" "leftPanel messageArea userList" ". inputField .";
-              }
+                grid-template-areas: "logo header nickName" "leftPanel messageArea userList" ". inputField .";
+            }
 
-              br {
+            br {
                 display: block;
                 margin: 10px 0;
-              }
-              
-              .leftPanel {
+            }
+
+            .logo {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                grid-area: logo;
+            }
+
+            .leftPanel {
                 display: grid;
                 grid-area: leftPanel;
                 grid-template-columns: 1fr;
@@ -271,54 +282,68 @@ export function activate(context: vscode.ExtensionContext) {
                 grid-template-areas: "serverList" "channelList";
                 grid-column-gap: 5px;
                 grid-row-gap: 5px;
-              }
-              
-              .channelList {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .channelList {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                border-bottom-right-radius: 80px;
+                background: rgba(230,230,250,0.5);
                 grid-area: channelList;
                 overflow: auto;
-              }
-              
-              .serverList {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .serverList {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                background: rgba(230,230,250,0.5);
                 grid-area: serverList;
                 overflow: auto;
-              }
-              
-              .userList {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .userList {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 60px;
+                background: rgba(217,211,211,0.4);
                 grid-area: userList;
                 overflow: auto;
-              }
-              
-              .nickName {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .nickName {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                background: rgba(244,247,243,0.5);
                 grid-area: nickName;
-              }
-              
-              .inputField {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .inputField {
+                border: 2px solid black;
+                border-style: hidden;
+                border-radius: 10px;
                 grid-area: inputField;
-              }
-              
-              .header {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .header {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                background: rgba(244,247,243,0.5);
                 grid-area: header;
-              }
-              
-              .messageArea {
-                border: 1px solid black;
-                border-style: rounded;
+            }
+
+            .messageArea {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 60px 90px 15px;
+                background: rgba(204,209,209,0.5);
                 grid-area: messageArea;
                 overflow: auto;
-              }
-              </style>
+            }
+            </style>
             `)
         }
 
@@ -327,149 +352,38 @@ export function activate(context: vscode.ExtensionContext) {
             let htmlPage = `<html>${this.loadStyle2()}<body>
                     
             <div class="grid-container">
-                <div class="leftPanel">
-                    <div class="channelList">
-                        ${lorem}
-                    </div>
-                    <div class="serverList">
-                        ${servers}
-                    </div>
+            <div class="leftPanel">
+                <div class="channelList">
+                    Channel
                 </div>
-                <div class="userList">
-                ${lorem}
-                </div>
-                <div class="nickName">
-                </div>
-                <div class="inputField">
-                    <input type="text" name="message">
-                    <input type="submit" value="Submit">
-                </div>
-                <div class="header">
-                </div>
-                <div class="messageArea">
-                    ${html}
+                <div class="serverList">
+                    servers
                 </div>
             </div>
+            <div class="userList">
+            User
+            </div>
+            <div class="nickName">
+              Nickname
+            </div>
+            <div class="inputField">
+              <input type="text" name="message">
+              <input type="submit" value="Submit">
+            </div>
+            <div class="header">
+              Header
+            </div>
+            <div class="logo">
+              logo
+            </div>
+            <div class="messageArea">
+              Message
+            </div>
+          </div>
                     
                 </body></html>`;
             this._panel.webview.html = htmlPage
         }
-    
-    
-        // public loadHtmlPage(): void {
-        //     let parseArrayofUsersDiv = (a: string[]) : string => `
-        //         <div>
-        //             ${a.join('<p>')}
-        //         </div>`
-    
-        //     let styleSheet = () :string => `
-    
-        //     `
-    
-        //     let parseHtmlBody = () : string => 
-        //     `<html>
-        //         <style>
-        //             ${styleSheet()}
-        //         </style>                                  
-        //         <body>
-        //             <h2>
-        //                 <center>
-        //                     ${urlPrefix}.${urlBase}.${urlEndPoint}
-        //                 </center>
-        //             </h2> <p>
-        //             <div class="row">
-        //                 ${parseArrayofUsersDiv(arrayOfUsers)}
-        //             </div>
-                    
-                    
-        //         </body>
-        //     </html>`
-            
-        //     htmlPage = parseHtmlBody()
-        //     this._panel.webview.html = htmlPage
-        // } 
-    
-    
-        // public loadIRCConnection() {
-        //     /** This reload the page every 100 ms */
-        //     setInterval(()=> {
-        //         this.loadHtmlPage()
-        //     }, 100)
-        //     // This will also faiil to reconnect if you change windows, but the left over html will still be displayed.
-    
-        //     client.connect()
-        //         .then(function(res: any) {
-        //             //console.log("RESPONSE:", JSON.stringify(res, null, 2))
-        //             if (res.isOk()) {
-        //                 client.raw(`JOIN #${channel}`);
-        //                 //client.raw(`JOIN #minecraft`);
-        //                 return res;
-        //                 //client.end(); // End connection to server.
-        //             }
-        //         })
-        //         .then((res: any) => {
-        //             nickname = res.value.nickname
-        //         })
-        //         .catch((e: string) => console.log(e));
-    
-        //     client.on('data', function(message: string) {
-        //         //console.log(message); /*?*/
-        //         parseMessage(message);
-        //         //loadHtmlPage()
-        //     });
-    
-        //     let removeSelf = (e: string) => e !== `${nickname}`
-        //     let remove = (array: string[], element: string) => array.filter(e => e !== element);
-            
-        //     function parseMessage(m: string) {
-    
-        //         // This will populate the arrayOfUsers on login to the specified channel
-        //         let serverUrl = `${urlBase}\.${urlEndPoint}`
-        //         let listOfUsersRegex = new RegExp(`:([A-Za-z]+)?\.?${serverUrl} 353 (${nickname}) [@=] #${channel} :(\.+)`);
-        //         let matchedUsers = m.match(listOfUsersRegex);
-        //         if (matchedUsers !== null) {
-        //             if (matchedUsers.length > 3) {
-        //                 let matchedUsersCorrectSyntax = matchedUsers[3].replace('@', '')
-        //                 //console.log('MATCHED USERS:', matchedUsers[3].replace('@', ''));
-        //                 arrayOfUsers = arrayOfUsers.concat(matchedUsersCorrectSyntax.split(' ').filter(removeSelf).sort());
-        //                 //console.log("ARRAY_OF_USERS_ON_LOGIN:", arrayOfUsers);
-        //             }
-        //         }
-    
-        //         let userLeftRegex = new RegExp(`(:\\S+) QUIT`);
-        //         let userLeftChannel = m.match(userLeftRegex);
-        //         if (userLeftChannel !== null) {
-        //             if (userLeftChannel.length > 0) {
-        //                 let theUserThatLeft = userLeftChannel[1].match(/:([a-zA-Z0-9\^-_]+)!/)
-        //                 if (theUserThatLeft !== null) {
-        //                     //console.log("USER_THAT_LEFT_CHANNEL:", userLeftChannel);
-        //                     arrayOfUsers = remove(arrayOfUsers, theUserThatLeft[1]).sort();
-        //                     //console.log("ARRAY_OF_USERS_AFTER_QUIT:", arrayOfUsers);
-        //                 }
-        //             }
-        //         }
-    
-        //         let userJoinedRegex = new RegExp(`(:\\S+) JOIN #${channel}`);
-        //         let userJoinedChannel = m.match(userJoinedRegex)
-        //         if (userJoinedChannel !== null) {
-        //             if (userJoinedChannel.length > 0) {
-        //                 let theUserThatJoined = userJoinedChannel[1].match(/:([a-zA-Z0-9\^-_]+)!/)
-        //                 if (theUserThatJoined !== null) {
-        //                     //console.log("USER_JOINED:", userJoinedChannel[1])
-        //                     arrayOfUsers = arrayOfUsers.concat([theUserThatJoined[1]]).sort();
-        //                     //console.log("ARRAY_OF_USERS_AFTER_JOIN:", arrayOfUsers)
-        //                 }
-        //             }
-        //         }
-        //     }
-    
-    
-        //}
-    
-        
-    
-        
-    
     
     
     }
