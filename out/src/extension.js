@@ -6,8 +6,10 @@ const gitChannel_1 = require("./gitChannel");
 const fs = require("fs");
 const fetch = require('node-fetch');
 const ini = require('ini');
-let html = '';
-let servers = '';
+let html = 'Loading...';
+let servers = 'Loading...';
+let channels = 'Loading...';
+let users = 'Loading...';
 let lorem = `Lorem ipsum dolor sit amet, tantas aliquip copiosae te mea. Sea ea nihil feugait. In vix tritani incorrupte, perpetua qualisque his cu, eu vis debet essent integre. Vel cu debitis recusabo voluptaria. Vix ubique essent repudiare ad. Minim detracto delicatissimi ei est, et per enim partiendo. In nec minim regione imperdiet.
 Cum cu accusam facilisi, liber appetere temporibus vix no, sed exerci mediocritatem an. An atqui iuvaret vis. Ei mea lobortis theophrastus. Eum magna lobortis explicari ex, vel ne eros imperdiet intellegat. Ludus consul consulatu vel in, mel ne porro commune honestatis.
 Nam wisi pertinacia at. Est alii efficiendi liberavisse et, audiam vidisse qualisque pro ut, in nec malis offendit. Mea putent maluisset ex. Ea eum sint melius timeam, et pri porro eirmod principes, quot velit vocibus est eu. No sumo perfecto sed, ne vix alii accusamus.
@@ -55,8 +57,9 @@ function activate(context) {
                 serverEvents = serverEventsArray;
                 for (let serverEvent of serverEventsArray) {
                     serverEvent.on('newMessage', (serverStatus) => {
-                        console.log('IT WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOORKED');
                         console.log("SERVERSTATUS CHANGED:", JSON.stringify(serverStatus, null, 2));
+                        if (IRCPanel.currentPanel)
+                            IRCPanel.currentPanel.updatedServerStatusToPanel(serverStatus, IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints());
                     });
                 }
             });
@@ -76,17 +79,21 @@ function activate(context) {
             IRCPanel.currentPanel.doRefactor();
         }
     }));
-    setInterval(() => {
-        let serverStatusArray = IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints();
-        console.log(serverStatusArray);
-        let serverHtml = '';
-        for (let server of serverStatusArray) {
-            serverHtml.concat(`${server.serverName}<br />`);
+    /*
+    setInterval(()=> {
+        let serverStatusArray : Array<Promise<object>> | any = IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints()
+        console.log(serverStatusArray)
+        let serverHtml = ''
+        for(let server of serverStatusArray) {
+            serverHtml.concat(`${server.serverName}<br />`)
         }
-        serverHtml = `<div>${serverHtml}</div>`;
-        html = JSON.stringify(IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints(), null, 2);
-        servers = serverHtml;
-    }, 1000);
+        serverHtml = `<div>${serverHtml}</div>`
+
+        html = JSON.stringify(IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints(),null,2)
+        servers = serverHtml
+
+    }, 1000)
+    */
     class IRCPanel {
         constructor(extensionPath, column) {
             this._disposables = [];
@@ -107,10 +114,13 @@ function activate(context) {
                         return;
                 }
             }, null, this._disposables);
-            //this.serverEventsArray.then((serverEventsArray : Promise<Array<EventEmitter>> | any) =>  {
-            //    console.log('IRCPANEL got the serverEvents array.')
-            //}).catch((e : any) => console.log('Promise Error in IRCPanel Eventloading'))
-            setInterval(() => this.loadMessages(), 1000);
+            this.loadMessages();
+            // this.serverEventsArray
+            //     .then((serverEventsArray : Promise<Array<EventEmitter>> | any) =>  {
+            //         console.log('IRCPANEL got the serverEvents array:', serverEventsArray)
+            //     }).catch((e : any) => console.log('Promise Error in IRCPanel Eventloading'))
+            //this.doSomething();
+            //setInterval(()=> this.loadMessages(), 1000);
         }
         static createOrShow(extensionPath) {
             const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
@@ -123,8 +133,20 @@ function activate(context) {
                 IRCPanel.currentPanel = new IRCPanel(extensionPath, vscode.ViewColumn.Three);
             }
         }
-        doSomething(message) {
-            console.log(message);
+        addBreakToUsersInChannel(u) {
+            return `${u}<br />`;
+        }
+        updatedServerStatusToPanel(serverStatus, serverStatusArray) {
+            // we are going to need to make this selectable.
+            servers = `${serverStatusArray.map((e) => e.serverName).join('<br />')}`;
+            channels = `${serverStatusArray.map((e) => e.channelCons.map((el) => el.channelName).join('<br />')).join('<br />')}`;
+            users = `${serverStatusArray
+                .map((e) => e.channelCons
+                .map((el) => el.usersInChannel
+                .map((elm) => `${elm}<br />`).join('')).join('')).join('')}`;
+            console.log('CHANNELS FROM UPDATE:', channels);
+            console.log('USERS FROM UPDATE:', users);
+            this.loadMessages();
         }
         doRefactor() {
             // Send a message to the webview webview.
@@ -206,12 +228,13 @@ function activate(context) {
                 height: 100%;
                 grid-template-columns: 150px 1fr 150px;
                 grid-template-rows: 30px 1fr 30px;
-                grid-template-areas: ". header nickName" "leftPanel messageArea userList" ". inputField .";
+                grid-template-areas: ". header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
+                overflow: auto;
               }
 
               br {
                 display: block;
-                margin: 10px 0;
+                margin: 10px 2px;
               }
               
               .leftPanel {
@@ -278,14 +301,14 @@ function activate(context) {
             <div class="grid-container">
                 <div class="leftPanel">
                     <div class="channelList">
-                        ${lorem}
+                        ${channels}
                     </div>
                     <div class="serverList">
                         ${servers}
                     </div>
                 </div>
                 <div class="userList">
-                ${lorem}
+                    ${users}
                 </div>
                 <div class="nickName">
                 </div>

@@ -3,11 +3,15 @@ import { IRCController } from './IRCController';
 import { getRemoteOrginSource, seeIfProjectIsForked } from './gitChannel'
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
+import { ServerStreamFileResponseOptions } from 'http2';
+import { promisify } from 'util';
 const fetch = require('node-fetch');
 const ini = require('ini');
 
-let html = '';
-let servers = '';
+let html = 'Loading...';
+let servers = 'Loading...';
+let channels = 'Loading...';
+let users = 'Loading...';
 
 let lorem = `Lorem ipsum dolor sit amet, tantas aliquip copiosae te mea. Sea ea nihil feugait. In vix tritani incorrupte, perpetua qualisque his cu, eu vis debet essent integre. Vel cu debitis recusabo voluptaria. Vix ubique essent repudiare ad. Minim detracto delicatissimi ei est, et per enim partiendo. In nec minim regione imperdiet.
 Cum cu accusam facilisi, liber appetere temporibus vix no, sed exerci mediocritatem an. An atqui iuvaret vis. Ei mea lobortis theophrastus. Eum magna lobortis explicari ex, vel ne eros imperdiet intellegat. Ludus consul consulatu vel in, mel ne porro commune honestatis.
@@ -76,8 +80,8 @@ export function activate(context: vscode.ExtensionContext) {
                         serverEvents = serverEventsArray;
                         for (let serverEvent of serverEventsArray) {
                             serverEvent.on('newMessage', (serverStatus : serverStatus) => {
-                                console.log('IT WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOORKED')
                                 console.log("SERVERSTATUS CHANGED:", JSON.stringify(serverStatus,null,2))
+                                if(IRCPanel.currentPanel) IRCPanel.currentPanel.updatedServerStatusToPanel(serverStatus, IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints());
                             })
                         }
                     })
@@ -99,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     }));
 
-
+    /*
     setInterval(()=> {
         let serverStatusArray : Array<Promise<object>> | any = IRCControllerActiveServerConnection.getServerStatusFromIRCEXpressEndPoints()
         console.log(serverStatusArray)
@@ -113,6 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
         servers = serverHtml
 
     }, 1000)
+    */
 
     
 
@@ -159,17 +164,35 @@ export function activate(context: vscode.ExtensionContext) {
                         return;
                 }
             }, null, this._disposables);
-            //this.serverEventsArray.then((serverEventsArray : Promise<Array<EventEmitter>> | any) =>  {
-            //    console.log('IRCPANEL got the serverEvents array.')
-            //}).catch((e : any) => console.log('Promise Error in IRCPanel Eventloading'))
+            this.loadMessages();
+            // this.serverEventsArray
+            //     .then((serverEventsArray : Promise<Array<EventEmitter>> | any) =>  {
+            //         console.log('IRCPANEL got the serverEvents array:', serverEventsArray)
+            //     }).catch((e : any) => console.log('Promise Error in IRCPanel Eventloading'))
+            //this.doSomething();
 
-            setInterval(()=> this.loadMessages(), 1000);
+            //setInterval(()=> this.loadMessages(), 1000);
         }
 
-        public doSomething(message: serverStatus) {
-            console.log(message)
+        public addBreakToUsersInChannel(u : string) {
+            return `${u}<br />`
+        }
+
+        public updatedServerStatusToPanel(serverStatus : serverStatus, serverStatusArray : Array<serverStatus>) {
+            // we are going to need to make this selectable.
+            servers  = `${serverStatusArray.map((e : serverStatus) => e.serverName).join('<br />')}`;
+            channels = `${serverStatusArray.map((e : serverStatus) => e.channelCons.map((el : channelConnections) => el.channelName).join('<br />')).join('<br />') }`
+            users    = `${serverStatusArray
+                .map((e : serverStatus) => e.channelCons
+                .map((el : channelConnections) => el.usersInChannel
+                .map((elm : string) => `${elm}<br />`).join('')).join('')).join('')}`
+            console.log('CHANNELS FROM UPDATE:', channels);
+            console.log('USERS FROM UPDATE:', users);
+            this.loadMessages()
         }
     
+
+
         public doRefactor() {
             // Send a message to the webview webview.
             // You can send any JSON serializable data.
@@ -255,12 +278,13 @@ export function activate(context: vscode.ExtensionContext) {
                 height: 100%;
                 grid-template-columns: 150px 1fr 150px;
                 grid-template-rows: 30px 1fr 30px;
-                grid-template-areas: ". header nickName" "leftPanel messageArea userList" ". inputField .";
+                grid-template-areas: ". header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
+                overflow: auto;
               }
 
               br {
                 display: block;
-                margin: 10px 0;
+                margin: 10px 2px;
               }
               
               .leftPanel {
@@ -329,14 +353,14 @@ export function activate(context: vscode.ExtensionContext) {
             <div class="grid-container">
                 <div class="leftPanel">
                     <div class="channelList">
-                        ${lorem}
+                        ${channels}
                     </div>
                     <div class="serverList">
                         ${servers}
                     </div>
                 </div>
                 <div class="userList">
-                ${lorem}
+                    ${users}
                 </div>
                 <div class="nickName">
                 </div>

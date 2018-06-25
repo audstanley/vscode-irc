@@ -136,6 +136,7 @@ export class IRCExpressEndpoint {
             //console.log(message); /*?*/
             //this.parseMessage(message);
             this.channelMessage(message)
+            this.serverEvent.emit('newMessage', this.serverStatus);
         });
     }
 
@@ -156,13 +157,13 @@ export class IRCExpressEndpoint {
                     let indexOfChannel = this.serverStatus.channelCons.findIndex(x => x.channelName == fromChannel);
                     if(this.serverStatus.channelCons[indexOfChannel]) {
                         this.serverStatus.channelCons[indexOfChannel].messages.push( {user: fromUser, message: MessageArray.slice(3).join(' ').substr(1), time: (new Date).getTime() });
-                        this.serverEvent.emit('newMessage', this.serverStatus);
+                       
                     }
                     if (MessageArray[3] === `:${this.nickname}:`) {
                         console.log('GOT DIRECT MESSAGE')
                         if(this.nickname) { 
                             vscode.window.showInformationMessage(`${fromUser}:` + MessageArray.slice(3).join(' ').substr(this.nickname.length + 2));
-                            this.serverEvent.emit('newMessage', this.serverStatus);
+                           
                         }
                         
                     }
@@ -170,7 +171,7 @@ export class IRCExpressEndpoint {
                         console.log('GOT DIRECT MESSAGE')
                         if(this.nickname) {
                             vscode.window.showInformationMessage(`${fromUser}:` + MessageArray.slice(3).join(' ').substr(this.nickname.length + 2));
-                            this.serverEvent.emit('newMessage', this.serverStatus);
+                          
                         }
                     }
                     console.log("MESSAGES FROM USER:", fromUser, this.serverStatus.channelCons[indexOfChannel].messages
@@ -218,7 +219,7 @@ export class IRCExpressEndpoint {
             }
             if(MessageArray.length === 2) {
                 if(MessageArray[0] === 'PING') {
-                    this.serverEvent.emit('newMessage', this.serverStatus);
+                    
                     //console.log("PING:\n\t", JSON.stringify(this.serverStatus.channelCons, null, 4));
                 }
             }
@@ -234,7 +235,7 @@ export class IRCExpressEndpoint {
                         let indexOfChannel = this.serverStatus.channelCons.findIndex(x => x.channelName == fromChannel);
                         this.serverStatus.channelCons[indexOfChannel].usersInChannel = this.serverStatus.channelCons[indexOfChannel].usersInChannel.concat(fromUser).sort(this.alphebeticSort);
                         console.log("USER IS NOW AT CHANNEL INDEX:", indexOfChannel, "AT USERINCHANNEL INDEX:", this.serverStatus.channelCons[indexOfChannel].usersInChannel.indexOf(fromUser));
-                        this.serverEvent.emit('newMessage', this.serverStatus);
+                       
                     }
                     else {
                         console.log('The USER IS YOU!!!');
@@ -243,7 +244,7 @@ export class IRCExpressEndpoint {
                         if (!this.serverStatus.channelCons[indexOfChannel]) {
                             console.log('CREATING NEW CHANNEL:', fromChannel, 'BECAUSE OF:', fromUser)
                             this.serverStatus.channelCons.push({ channelName: MessageArray[2].substr(1).replace(':', ''), messages: [], usersInChannel: [] });
-                            this.serverEvent.emit('newMessage', this.serverStatus);
+                           
                         }
                     }
                 }
