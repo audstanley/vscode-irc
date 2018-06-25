@@ -12,6 +12,7 @@ let html = 'Loading...';
 let servers = 'Loading...';
 let channels = 'Loading...';
 let users = 'Loading...';
+let messages = 'Loading...';
 
 let lorem = `Lorem ipsum dolor sit amet, tantas aliquip copiosae te mea. Sea ea nihil feugait. In vix tritani incorrupte, perpetua qualisque his cu, eu vis debet essent integre. Vel cu debitis recusabo voluptaria. Vix ubique essent repudiare ad. Minim detracto delicatissimi ei est, et per enim partiendo. In nec minim regione imperdiet.
 Cum cu accusam facilisi, liber appetere temporibus vix no, sed exerci mediocritatem an. An atqui iuvaret vis. Ei mea lobortis theophrastus. Eum magna lobortis explicari ex, vel ne eros imperdiet intellegat. Ludus consul consulatu vel in, mel ne porro commune honestatis.
@@ -186,6 +187,9 @@ export function activate(context: vscode.ExtensionContext) {
                 .map((e : serverStatus) => e.channelCons
                 .map((el : channelConnections) => el.usersInChannel
                 .map((elm : string) => `${elm}<br />`).join('')).join('')).join('')}`
+            messages = `${serverStatusArray.map((e : serverStatus) => e.channelCons
+                .map((chCon : channelConnections) => chCon.messages
+                .map((messObj : userMesssage) => `${messObj.user}: ${messObj.message}<br />`)).join('')).join('') }`
             console.log('CHANNELS FROM UPDATE:', channels);
             console.log('USERS FROM UPDATE:', users);
             this.loadMessages()
@@ -398,7 +402,7 @@ export function activate(context: vscode.ExtensionContext) {
                         ${channels}
                     </div>
                     <div class="serverList">
-                        servers
+                        ${servers}
                     </div>
                 </div>
                 <div class="userList">
@@ -418,7 +422,7 @@ export function activate(context: vscode.ExtensionContext) {
                     logo
                 </div>
                 <div class="messageArea">
-                    <div class="textposition">Message</div>
+                    <div class="textposition">${messages}</div>
                 </div>
             </div>
                     

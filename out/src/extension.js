@@ -10,6 +10,7 @@ let html = 'Loading...';
 let servers = 'Loading...';
 let channels = 'Loading...';
 let users = 'Loading...';
+let messages = 'Loading...';
 let lorem = `Lorem ipsum dolor sit amet, tantas aliquip copiosae te mea. Sea ea nihil feugait. In vix tritani incorrupte, perpetua qualisque his cu, eu vis debet essent integre. Vel cu debitis recusabo voluptaria. Vix ubique essent repudiare ad. Minim detracto delicatissimi ei est, et per enim partiendo. In nec minim regione imperdiet.
 Cum cu accusam facilisi, liber appetere temporibus vix no, sed exerci mediocritatem an. An atqui iuvaret vis. Ei mea lobortis theophrastus. Eum magna lobortis explicari ex, vel ne eros imperdiet intellegat. Ludus consul consulatu vel in, mel ne porro commune honestatis.
 Nam wisi pertinacia at. Est alii efficiendi liberavisse et, audiam vidisse qualisque pro ut, in nec malis offendit. Mea putent maluisset ex. Ea eum sint melius timeam, et pri porro eirmod principes, quot velit vocibus est eu. No sumo perfecto sed, ne vix alii accusamus.
@@ -144,6 +145,9 @@ function activate(context) {
                 .map((e) => e.channelCons
                 .map((el) => el.usersInChannel
                 .map((elm) => `${elm}<br />`).join('')).join('')).join('')}`;
+            messages = `${serverStatusArray.map((e) => e.channelCons
+                .map((chCon) => chCon.messages
+                .map((messObj) => `${messObj.user}: ${messObj.message}<br />`)).join('')).join('')}`;
             console.log('CHANNELS FROM UPDATE:', channels);
             console.log('USERS FROM UPDATE:', users);
             this.loadMessages();
@@ -226,15 +230,33 @@ function activate(context) {
             .grid-container {
                 display: grid;
                 height: 100%;
+                grid-row-gap: 5px;
+                grid-column-gap: 5px;
                 grid-template-columns: 150px 1fr 150px;
                 grid-template-rows: 30px 1fr 30px;
-                grid-template-areas: ". header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
-                overflow: auto;
+                grid-template-areas: "logo header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
               }
-
+          
               br {
                 display: block;
                 margin: 10px 2px;
+              }
+              
+              .button {
+                background-color: #3399ff;
+                border: 2px solid #3399ff;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                grid-area: logo;
+                overflow: auto;
+              }
+              
+              .logo {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                grid-area: logo;
+                overflow: auto;
               }
               
               .leftPanel {
@@ -245,54 +267,78 @@ function activate(context) {
                 grid-template-areas: "serverList" "channelList";
                 grid-column-gap: 5px;
                 grid-row-gap: 5px;
+                overflow: auto;
               }
               
               .channelList {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                border-bottom-right-radius: 80px;
+                background: rgba(230,230,250,0.5);
                 grid-area: channelList;
                 overflow: auto;
               }
               
               .serverList {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                background: rgba(230,230,250,0.5);
                 grid-area: serverList;
                 overflow: auto;
               }
               
               .userList {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 60px;
+                background: rgba(217,211,211,0.4);
                 grid-area: userList;
                 overflow: auto;
               }
               
               .nickName {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                background: rgba(244,247,243,0.5);
                 grid-area: nickName;
+                overflow: auto;
               }
               
               .inputField {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: hidden;
                 grid-area: inputField;
+                overflow: auto;
               }
               
               .header {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                background: rgba(244,247,243,0.5);
                 grid-area: header;
+                overflow: auto;
               }
               
               .messageArea {
-                border: 1px solid black;
-                border-style: rounded;
+                position: relative;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 60px 90px 15px;
+                background: rgba(204,209,209,0.5);
                 grid-area: messageArea;
                 overflow: auto;
               }
-              </style>
+              
+              .textposition {
+                position: absolute;
+                bottom: 5px;
+              }
+              
+            </style>
             `);
         }
         loadMessages() {
@@ -311,15 +357,20 @@ function activate(context) {
                     ${users}
                 </div>
                 <div class="nickName">
+                    Nickname
                 </div>
                 <div class="inputField">
-                    <input type="text" name="message">
-                    <input type="submit" value="Submit">
+                    <input type="text" class="logo" name="message">
+                    <input type="submit" class="button" value="Send">
                 </div>
                 <div class="header">
+                    Header
+                </div>
+                <div class="logo">
+                    logo
                 </div>
                 <div class="messageArea">
-                    ${html}
+                    <div class="textposition">${messages}</div>
                 </div>
             </div>
                     
