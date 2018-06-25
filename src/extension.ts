@@ -276,15 +276,33 @@ export function activate(context: vscode.ExtensionContext) {
             .grid-container {
                 display: grid;
                 height: 100%;
+                grid-row-gap: 5px;
+                grid-column-gap: 5px;
                 grid-template-columns: 150px 1fr 150px;
                 grid-template-rows: 30px 1fr 30px;
-                grid-template-areas: ". header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
-                overflow: auto;
+                grid-template-areas: "logo header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
               }
-
+          
               br {
                 display: block;
                 margin: 10px 2px;
+              }
+              
+              .button {
+                background-color: #3399ff;
+                border: 2px solid #3399ff;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                grid-area: logo;
+                overflow: auto;
+              }
+              
+              .logo {
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                grid-area: logo;
+                overflow: auto;
               }
               
               .leftPanel {
@@ -295,54 +313,78 @@ export function activate(context: vscode.ExtensionContext) {
                 grid-template-areas: "serverList" "channelList";
                 grid-column-gap: 5px;
                 grid-row-gap: 5px;
+                overflow: auto;
               }
               
               .channelList {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                border-bottom-right-radius: 80px;
+                background: rgba(230,230,250,0.5);
                 grid-area: channelList;
                 overflow: auto;
               }
               
               .serverList {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                background: rgba(230,230,250,0.5);
                 grid-area: serverList;
                 overflow: auto;
               }
               
               .userList {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 60px;
+                background: rgba(217,211,211,0.4);
                 grid-area: userList;
                 overflow: auto;
               }
               
               .nickName {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                background: rgba(244,247,243,0.5);
                 grid-area: nickName;
+                overflow: auto;
               }
               
               .inputField {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: hidden;
                 grid-area: inputField;
+                overflow: auto;
               }
               
               .header {
-                border: 1px solid black;
-                border-style: rounded;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px;
+                background: rgba(244,247,243,0.5);
                 grid-area: header;
+                overflow: auto;
               }
               
               .messageArea {
-                border: 1px solid black;
-                border-style: rounded;
+                position: relative;
+                border: 2px solid black;
+                border-style: groove;
+                border-radius: 5px 60px 90px 15px;
+                background: rgba(204,209,209,0.5);
                 grid-area: messageArea;
                 overflow: auto;
               }
-              </style>
+              
+              .textposition {
+                position: absolute;
+                bottom: 5px;
+              }
+              
+            </style>
             `)
         }
 
@@ -356,144 +398,33 @@ export function activate(context: vscode.ExtensionContext) {
                         ${channels}
                     </div>
                     <div class="serverList">
-                        ${servers}
+                        servers
                     </div>
                 </div>
                 <div class="userList">
                     ${users}
                 </div>
                 <div class="nickName">
+                    Nickname
                 </div>
                 <div class="inputField">
-                    <input type="text" name="message">
-                    <input type="submit" value="Submit">
+                    <input type="text" class="logo" name="message">
+                    <input type="submit" class="button" value="Send">
                 </div>
                 <div class="header">
+                    Header
+                </div>
+                <div class="logo">
+                    logo
                 </div>
                 <div class="messageArea">
-                    ${html}
+                    <div class="textposition">Message</div>
                 </div>
             </div>
                     
                 </body></html>`;
             this._panel.webview.html = htmlPage
         }
-    
-    
-        // public loadHtmlPage(): void {
-        //     let parseArrayofUsersDiv = (a: string[]) : string => `
-        //         <div>
-        //             ${a.join('<p>')}
-        //         </div>`
-    
-        //     let styleSheet = () :string => `
-    
-        //     `
-    
-        //     let parseHtmlBody = () : string => 
-        //     `<html>
-        //         <style>
-        //             ${styleSheet()}
-        //         </style>                                  
-        //         <body>
-        //             <h2>
-        //                 <center>
-        //                     ${urlPrefix}.${urlBase}.${urlEndPoint}
-        //                 </center>
-        //             </h2> <p>
-        //             <div class="row">
-        //                 ${parseArrayofUsersDiv(arrayOfUsers)}
-        //             </div>
-                    
-                    
-        //         </body>
-        //     </html>`
-            
-        //     htmlPage = parseHtmlBody()
-        //     this._panel.webview.html = htmlPage
-        // } 
-    
-    
-        // public loadIRCConnection() {
-        //     /** This reload the page every 100 ms */
-        //     setInterval(()=> {
-        //         this.loadHtmlPage()
-        //     }, 100)
-        //     // This will also faiil to reconnect if you change windows, but the left over html will still be displayed.
-    
-        //     client.connect()
-        //         .then(function(res: any) {
-        //             //console.log("RESPONSE:", JSON.stringify(res, null, 2))
-        //             if (res.isOk()) {
-        //                 client.raw(`JOIN #${channel}`);
-        //                 //client.raw(`JOIN #minecraft`);
-        //                 return res;
-        //                 //client.end(); // End connection to server.
-        //             }
-        //         })
-        //         .then((res: any) => {
-        //             nickname = res.value.nickname
-        //         })
-        //         .catch((e: string) => console.log(e));
-    
-        //     client.on('data', function(message: string) {
-        //         //console.log(message); /*?*/
-        //         parseMessage(message);
-        //         //loadHtmlPage()
-        //     });
-    
-        //     let removeSelf = (e: string) => e !== `${nickname}`
-        //     let remove = (array: string[], element: string) => array.filter(e => e !== element);
-            
-        //     function parseMessage(m: string) {
-    
-        //         // This will populate the arrayOfUsers on login to the specified channel
-        //         let serverUrl = `${urlBase}\.${urlEndPoint}`
-        //         let listOfUsersRegex = new RegExp(`:([A-Za-z]+)?\.?${serverUrl} 353 (${nickname}) [@=] #${channel} :(\.+)`);
-        //         let matchedUsers = m.match(listOfUsersRegex);
-        //         if (matchedUsers !== null) {
-        //             if (matchedUsers.length > 3) {
-        //                 let matchedUsersCorrectSyntax = matchedUsers[3].replace('@', '')
-        //                 //console.log('MATCHED USERS:', matchedUsers[3].replace('@', ''));
-        //                 arrayOfUsers = arrayOfUsers.concat(matchedUsersCorrectSyntax.split(' ').filter(removeSelf).sort());
-        //                 //console.log("ARRAY_OF_USERS_ON_LOGIN:", arrayOfUsers);
-        //             }
-        //         }
-    
-        //         let userLeftRegex = new RegExp(`(:\\S+) QUIT`);
-        //         let userLeftChannel = m.match(userLeftRegex);
-        //         if (userLeftChannel !== null) {
-        //             if (userLeftChannel.length > 0) {
-        //                 let theUserThatLeft = userLeftChannel[1].match(/:([a-zA-Z0-9\^-_]+)!/)
-        //                 if (theUserThatLeft !== null) {
-        //                     //console.log("USER_THAT_LEFT_CHANNEL:", userLeftChannel);
-        //                     arrayOfUsers = remove(arrayOfUsers, theUserThatLeft[1]).sort();
-        //                     //console.log("ARRAY_OF_USERS_AFTER_QUIT:", arrayOfUsers);
-        //                 }
-        //             }
-        //         }
-    
-        //         let userJoinedRegex = new RegExp(`(:\\S+) JOIN #${channel}`);
-        //         let userJoinedChannel = m.match(userJoinedRegex)
-        //         if (userJoinedChannel !== null) {
-        //             if (userJoinedChannel.length > 0) {
-        //                 let theUserThatJoined = userJoinedChannel[1].match(/:([a-zA-Z0-9\^-_]+)!/)
-        //                 if (theUserThatJoined !== null) {
-        //                     //console.log("USER_JOINED:", userJoinedChannel[1])
-        //                     arrayOfUsers = arrayOfUsers.concat([theUserThatJoined[1]]).sort();
-        //                     //console.log("ARRAY_OF_USERS_AFTER_JOIN:", arrayOfUsers)
-        //                 }
-        //             }
-        //         }
-        //     }
-    
-    
-        //}
-    
-        
-    
-        
-    
     
     
     }
