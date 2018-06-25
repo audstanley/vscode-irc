@@ -259,22 +259,32 @@ export function activate(context: vscode.ExtensionContext) {
                 grid-column-gap: 5px;
                 grid-template-columns: 150px 1fr 150px;
                 grid-template-rows: 30px 1fr 30px;
-                grid-template-areas: "logo header nickName" "leftPanel messageArea userList" ". inputField .";
-            }
-
-            br {
+                grid-template-areas: "logo header nickName" "leftPanel messageArea userList" "leftPanel inputField userList";
+              }
+          
+              br {
                 display: block;
                 margin: 10px 0;
-            }
-
-            .logo {
+              }
+              
+              .button {
+                background-color: #3399ff;
+                border: 2px solid #3399ff;
+                border-style: groove;
+                border-radius: 5px 20px 5px;
+                grid-area: logo;
+                overflow: auto;
+              }
+              
+              .logo {
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px 20px 5px;
                 grid-area: logo;
-            }
-
-            .leftPanel {
+                overflow: auto;
+              }
+              
+              .leftPanel {
                 display: grid;
                 grid-area: leftPanel;
                 grid-template-columns: 1fr;
@@ -282,9 +292,10 @@ export function activate(context: vscode.ExtensionContext) {
                 grid-template-areas: "serverList" "channelList";
                 grid-column-gap: 5px;
                 grid-row-gap: 5px;
-            }
-
-            .channelList {
+                overflow: auto;
+              }
+              
+              .channelList {
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px;
@@ -292,57 +303,66 @@ export function activate(context: vscode.ExtensionContext) {
                 background: rgba(230,230,250,0.5);
                 grid-area: channelList;
                 overflow: auto;
-            }
-
-            .serverList {
+              }
+              
+              .serverList {
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px;
                 background: rgba(230,230,250,0.5);
                 grid-area: serverList;
                 overflow: auto;
-            }
-
-            .userList {
+              }
+              
+              .userList {
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px 60px;
                 background: rgba(217,211,211,0.4);
                 grid-area: userList;
                 overflow: auto;
-            }
-
-            .nickName {
+              }
+              
+              .nickName {
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px 20px 5px;
                 background: rgba(244,247,243,0.5);
                 grid-area: nickName;
-            }
-
-            .inputField {
+                overflow: auto;
+              }
+              
+              .inputField {
                 border: 2px solid black;
                 border-style: hidden;
-                border-radius: 10px;
                 grid-area: inputField;
-            }
-
-            .header {
+                overflow: auto;
+              }
+              
+              .header {
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px;
                 background: rgba(244,247,243,0.5);
                 grid-area: header;
-            }
-
-            .messageArea {
+                overflow: auto;
+              }
+              
+              .messageArea {
+                position: relative;
                 border: 2px solid black;
                 border-style: groove;
                 border-radius: 5px 60px 90px 15px;
                 background: rgba(204,209,209,0.5);
                 grid-area: messageArea;
                 overflow: auto;
-            }
+              }
+              
+              .textposition {
+                position: absolute;
+                bottom: 5px;
+              }
+              
             </style>
             `)
         }
@@ -352,34 +372,34 @@ export function activate(context: vscode.ExtensionContext) {
             let htmlPage = `<html>${this.loadStyle2()}<body>
                     
             <div class="grid-container">
-            <div class="leftPanel">
-                <div class="channelList">
-                    Channel
+                <div class="leftPanel">
+                    <div class="channelList">
+                        Channel
+                    </div>
+                    <div class="serverList">
+                        servers
+                    </div>
                 </div>
-                <div class="serverList">
-                    servers
+                <div class="userList">
+                User
+                </div>
+                <div class="nickName">
+                    Nickname
+                </div>
+                <div class="inputField">
+                    <input type="text" class="logo" name="message">
+                    <input type="submit" class="button" value="Send">
+                </div>
+                <div class="header">
+                    Header
+                </div>
+                <div class="logo">
+                    logo
+                </div>
+                <div class="messageArea">
+                    <div class="textposition">Message</div>
                 </div>
             </div>
-            <div class="userList">
-            User
-            </div>
-            <div class="nickName">
-              Nickname
-            </div>
-            <div class="inputField">
-              <input type="text" name="message">
-              <input type="submit" value="Submit">
-            </div>
-            <div class="header">
-              Header
-            </div>
-            <div class="logo">
-              logo
-            </div>
-            <div class="messageArea">
-              Message
-            </div>
-          </div>
                     
                 </body></html>`;
             this._panel.webview.html = htmlPage
